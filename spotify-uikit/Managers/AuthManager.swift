@@ -18,7 +18,7 @@ final class AuthManager {
         static let tokenAPIURL = "https://accounts.spotify.com/api/token"
         static let redirectURI = "https://google.com"
         static let base = "https://accounts.spotify.com/authorize"
-        static let scopes = "user-read-private&20playlist-modify-public%20playlist-read-private%20playlist-modify-private%20user-follow-read%20user-library-modify%20user-library-read%20user-read-email"
+        static let scopes = "user-read-email user-read-private playlist-modify-public playlist-read-private playlist-modify-private user-follow-read user-library-modify user-library-read"
     }
     
     private init() {}
@@ -26,7 +26,7 @@ final class AuthManager {
     public var signInURL: URL? {
 
         let string = "\(Constants.base)?response_type=code&client_id=\(Constants.clientID)&scope=\(Constants.scopes)&redirect_uri=\(Constants.redirectURI)&show_dialog=TRUE"
-        return URL(string: string)
+        return URL(string: string.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
     }
     
     var isSignedIn: Bool {
@@ -147,10 +147,10 @@ final class AuthManager {
         }
     }
     
-    public func refreshAccessToken(completion: @escaping (Bool) -> Void) {
+    public func refreshAccessToken(completion: ((Bool) -> Void)?) {
         // Get Token api call
         guard let url = URL(string: Constants.tokenAPIURL) else {
-            completion(false)
+            completion?(false)
             return
         }
         
@@ -172,7 +172,7 @@ final class AuthManager {
         
         guard let base64String = data?.base64EncodedString() else {
             print("Failure to get base64")
-            completion(false)
+            completion?(false)
             return
         }
         
@@ -182,11 +182,14 @@ final class AuthManager {
             self?.refreshingToken = false
             
             guard let data = data, error == nil else {
-                completion(false)
+                completion?(false)
                 return
             }
             
             do {
+                let response = try JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed)
+                print("Check here: \(response)")
+                
                 let result = try JSONDecoder().decode(AuthResponse.self, from: data)
 
                 //
@@ -194,10 +197,10 @@ final class AuthManager {
                 self?.onRefreshBlocks.removeAll()
                 
                 self?.cacheToken(result: result)
-                completion(true)
+                completion?(true)
             } catch {
                 print(error)
-                completion(false)
+                completion?(false)
             }
         }
         
@@ -228,18 +231,18 @@ final class AuthManager {
         }
     }
     
-    public func refreshIfNeeded(completion: @escaping (Bool) -> Void) {
+    public func refreshIfNeeded(completion: ((Bool) -> Void)?) {
         guard !refreshingToken else {
             return
         }
         
         guard shouldRefreshToken else {
-            completion(true)
+            completion?(true)
             return
         }
         
         self.refreshAccessToken { success in
-            completion(success)
+            completion?(success)
         }
     }
     
@@ -248,7 +251,7 @@ final class AuthManager {
         
         // to avoid overriding the refresh token when refreshing access token
         if let refresh_token = result.refresh_token {
-            UserDefaults.standard.setValue(result.refresh_token, forKey: refresh_token)
+            UserDefaults.standard.setValue(refresh_token, forKey: "refresh_token")
         }
         UserDefaults.standard.setValue(Date().addingTimeInterval(TimeInterval(result.expires_in)), forKey: "expirationDate")
     }
