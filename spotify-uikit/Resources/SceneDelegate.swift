@@ -11,17 +11,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+
         // set main window root view controller to navigation controller
         let window = UIWindow(windowScene: windowScene)
-        
-        if (AuthManager.shared.isSignedIn) {
+
+        if AuthManager.shared.isSignedIn {
             AuthManager.shared.refreshIfNeeded(completion: nil)
             window.rootViewController = TabBarViewController()
         } else {
@@ -30,15 +29,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             navVC.viewControllers.first?.navigationItem.largeTitleDisplayMode = .always
             window.rootViewController = navVC
         }
-        
+
         //
         self.window = window
         window.makeKeyAndVisible()
-        
+
         AuthManager.shared.refreshIfNeeded { success in
             print(success)
         }
-        
+
         print(AuthManager.shared.signInURL?.absoluteString)
     }
 
@@ -70,6 +69,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
-
 }
-

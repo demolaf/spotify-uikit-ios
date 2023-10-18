@@ -8,6 +8,5 @@ target 'spotify-uikit' do
   # Pods for spotify-uikit
   pod 'SDWebImage'
   pod 'Appirater'
-  pod 'Firebase/Analytics'
 
 end

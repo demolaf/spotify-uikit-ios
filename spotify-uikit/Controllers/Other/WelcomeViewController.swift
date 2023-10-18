@@ -8,7 +8,7 @@
 import UIKit
 
 class WelcomeViewController: UIViewController {
-    
+
     private let signInButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .white
@@ -23,17 +23,17 @@ class WelcomeViewController: UIViewController {
         // Do any additional setup after loading the view.
         title = "Spotify"
         view.backgroundColor = .systemGreen
-        
+
         view.addSubview(signInButton)
         signInButton.addTarget(self, action: #selector(didTapSignIn), for: .touchUpInside)
     }
-    
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
+
         signInButton.frame = CGRect(x: 20, y: view.height-50-view.safeAreaInsets.bottom, width: view.width-40, height: 50)
     }
-    
+
     @objc func didTapSignIn() {
         let vc = AuthViewController()
         vc.completionHandler = { [weak self] success in
@@ -44,7 +44,7 @@ class WelcomeViewController: UIViewController {
         vc.navigationItem.largeTitleDisplayMode = .never
         navigationController?.pushViewController(vc, animated: true)
     }
-    
+
     private func handleSignIn(success: Bool) {
         // Log user in or yell at them for error
         guard success else {
@@ -52,7 +52,7 @@ class WelcomeViewController: UIViewController {
             alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel))
             return
         }
-        
+
         let mainAppTabBarVC = TabBarViewController()
         mainAppTabBarVC.modalPresentationStyle = .fullScreen
         present(mainAppTabBarVC, animated: true)
